@@ -1,7 +1,7 @@
 setwd("C:/Users/acher/crypto/")
 
 #Pick Which Coin
-coin = "BTC" #"ETH" #"BTC"
+coin = "ETH" #"BTC"
 
 #Read in exchange files and sample them at the given interval
 ex_read <- function(exchange,interval){
@@ -67,11 +67,41 @@ rownames(df) <- exchange_list
 #Populate the Empty Table
 for (i in 1:length(exchange_list)){
   for (j in 1:length(intervals)){
-      df[i,j] <- jump_calc(exchange_list[i],intervals[j])
-  }
+    df[i,j] <- jump_calc(exchange_list[i],intervals[j])
+    }
 }
 
 View(df)
 
 #Export the Table
 write.csv(df,paste0(coin,"ASJ_table.csv"), row.names = TRUE)
+
+
+df2 <- data.frame(A = c(0.50, 0.70, 0.30), B = c(0.80, 0.60, 0.30))
+
+# Function to test if proportions in a column are equal
+test_proportions <- function(proportions) {
+  # Convert proportions to observed counts (relative to a fixed total)
+  total <- 365
+  observed <- proportions * total
+  
+  # Expected counts if proportions are equal
+  expected <- rep(mean(observed), length(observed))
+  
+  # Perform chi-squared test
+  chisq.test(x = observed, p = expected / sum(expected))
+}
+
+# Test for each column
+min1_result <- test_proportions(df$`1 min`)
+min1_result$p.value
+
+min5_result <- test_proportions(df$`5 min`)
+min5_result$p.value
+
+min10_result <- test_proportions(df$`10 min`)
+min10_result$p.value
+
+write.csv(df,paste0(coin,"_Chi.csv"), row.names = TRUE)
+
+prop.test(successes, sample_sizes)
