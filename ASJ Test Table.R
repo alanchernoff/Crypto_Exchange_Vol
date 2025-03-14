@@ -49,6 +49,20 @@ jump_calc <- function (exchange,interval){
   jumpday
 }
 
+#chi-squared proportion test
+test_proportions <- function(proportions) {
+  # Convert proportions to observed counts (relative to a fixed total)
+  total <- 365
+  observed <- proportions * total
+  
+  # Expected counts if proportions are equal
+  expected <- rep(mean(observed), length(observed))
+  
+  # Perform chi-squared test
+  chisq.test(x = observed, p = expected / sum(expected))
+}
+
+
 #Exchanges and Sample Intervals
 intervals = c(1,5,10)
 intervals_t <- c("1 min", "5 min", "10 min")
@@ -75,10 +89,9 @@ for (i in 1:length(exchange_list)){
 
 View(df)
 
-#Export the Table
-write.csv(df,paste0(coin,"ASJ_table.csv"), row.names = TRUE)
 
 #############################################################################################3
+
 
 # Test for each column
 min1_result <- test_proportions(df$`1 min`)
@@ -132,7 +145,7 @@ prop_min5 <- prop.test(successes_5min, trials)
 prop_min10 <- prop.test(successes_10min, trials)
 
 
-# Extract chi-squared statistic and p-value
+# Extract t-statistic and p-value
 t_stats <- c(prop_min1$statistic, prop_min5$statistic, prop_min10$statistic)
 p_values <- c(prop_min1$p.value, prop_min5$p.value, prop_min10$p.value)
 
@@ -149,4 +162,9 @@ View(prop_df)
 View(chi_df)
 View(df)
 
+###############################################################
+
+#Export the Tables
+write.csv(df,paste0(coin,"ASJ_table.csv"), row.names = TRUE)
 write.csv(chi_df,paste0(coin,"_Chi.csv"), row.names = TRUE)
+write.csv(prop_df,paste0(coin,"_t_prop.csv"), row.names = TRUE)
