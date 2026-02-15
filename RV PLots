@@ -34,8 +34,8 @@ ex_read <- function(exchange,interval,crypto){
   df
 }
 
-sample = ex_read(exchange_list[1],5)
-View(sample)
+#sample = ex_read(exchange_list[1],5,"BTC")
+#View(sample)
 
 Day <- seq(as.Date("2023-01-01"), as.Date("2023-12-31"), by = "day")
 Vol_list =as.data.frame(Day)
