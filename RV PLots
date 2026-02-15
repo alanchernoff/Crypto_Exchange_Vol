@@ -1,4 +1,3 @@
-
 library(ggplot2)
 
 setwd("C:/Users/acher/crypto/")
@@ -10,6 +9,8 @@ exchange_list22 = c("Bitfinex","Bitstamp","Coinbase","Exmo","FTX","HitBTC","Krak
 #note: Kraken is in USDT for ETH only
 #note: kucoin and FTX stop in 11/12
 #note: kucoin is in USDT for btc and ETH
+
+
 
 
 #realized volatility calculation
@@ -26,8 +27,8 @@ Vol_calc <- function (raw){
 } 
 
 #Read in exchange files and sample at interval
-ex_read <- function(exchange,interval){
-  raw=read.csv(file=paste0("raw/",exchange,"_ETH_Minute.csv"),header=TRUE)
+ex_read <- function(exchange,interval,crypto){
+  raw=read.csv(file=paste0("raw/",exchange,"_",crypto,"_Minute.csv"),header=TRUE)
   raw <- raw[, -c(1)]
   df = raw[, seq(1, ncol(raw), interval)]
   df
@@ -39,9 +40,13 @@ View(sample)
 Day <- seq(as.Date("2023-01-01"), as.Date("2023-12-31"), by = "day")
 Vol_list =as.data.frame(Day)
 
+crypto_list = c("BTC", "ETH")
 
+# Loop through each cryptocurrency
+for(crypto in crypto_list){
+  
 for(exchange in exchange_list){
-  raw=ex_read(exchange,5)
+  raw=ex_read(exchange,5,crypto)
   RV=Vol_calc(log(raw))
   Vol_list[exchange] <- RV
 }
@@ -53,14 +58,14 @@ View(Vol_list)
 for(exchange in exchange_list){
   
   # Create the plot
-  png(filename = paste0("Volplots/ETH_", exchange, "_volatility.png"), 
+  png(filename = paste0("Volplots/",crypto,"_", exchange, "_volatility.png"), 
       width = 1200, height = 600, res = 100)
   
   plot(Vol_list$Day, Vol_list[[exchange]], 
        type = "l", 
        col = "blue", 
        lwd = 2,
-       main = paste(exchange, "- Realized Volatility (5-min)", sep = " "),
+       main = paste(exchange, crypto, "- Realized Volatility (5-min)", sep = " "),
        xlab = "Date",
        ylab = "Realized Volatility",
        xaxt = "n")
@@ -73,49 +78,5 @@ for(exchange in exchange_list){
   grid()
   
   dev.off()
-  
-  # Also display the plot in R
-  plot(Vol_list$Day, Vol_list[[exchange]], 
-       type = "l", 
-       col = "blue", 
-       lwd = 2,
-       main = paste(exchange, "- Realized Volatility (5-min)", sep = " "),
-       xlab = "Date",
-       ylab = "Realized Volatility",
-       xaxt = "n")
-  
-  axis.Date(1, at = seq(min(Vol_list$Day), max(Vol_list$Day), by = "month"), 
-            format = "%b %Y")
-  
-  grid()
+  }
 }
-
-# Optional: Create a combined plot with all exchanges
-png(filename = "volatility_plots/All_Exchanges_Combined.png", 
-    width = 1400, height = 800, res = 100)
-
-plot(Vol_list$Day, Vol_list[[exchange_list[1]]], 
-     type = "l", 
-     col = 1,
-     lwd = 2,
-     main = "All Exchanges - Realized Volatility Comparison",
-     xlab = "Date",
-     ylab = "Realized Volatility",
-     ylim = c(min(Vol_list[,-1], na.rm = TRUE), 
-              max(Vol_list[,-1], na.rm = TRUE)),
-     xaxt = "n")
-
-for(i in 2:length(exchange_list)){
-  lines(Vol_list$Day, Vol_list[[exchange_list[i]]], 
-        col = i, lwd = 2)
-}
-
-axis.Date(1, at = seq(min(Vol_list$Day), max(Vol_list$Day), by = "month"), 
-          format = "%b %Y")
-
-legend("topright", legend = exchange_list, col = 1:length(exchange_list), 
-       lwd = 2, cex = 0.8)
-
-grid()
-
-dev.off()
