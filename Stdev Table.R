@@ -12,8 +12,7 @@ ex_read <- function(exchange,interval,crypto){
 }
 
 #Stdev Calculation
-Vol_calc <- function (exchange, interval, crypto){
-  raw=ex_read(exchange,interval,crypto)
+Vol_calc <- function (raw){
   mat=data.matrix(raw, rownames.force = NA) 
   mat=t(mat)
   #mat=log(mat)
@@ -44,8 +43,9 @@ rownames(df) <- exchange_list
 #Populate the Empty Table
 for (i in 1:length(exchange_list)){
   for (j in 1:length(intervals)){
-    RV = Vol_calc(exchange_list[i],intervals[j],coin)
-    df[i,j] <- sd(RV)
+    raw=ex_read(exchange_list[i],intervals[j],coin)
+    RV = Vol_calc(log(raw))
+    df[i,j] <- sd(RV[[1]])
   }
 }
 
